@@ -31,7 +31,8 @@ const { url } = await startStaticServer({
   base: values.base,
   port: Number(values.port),
   onRequest: ({ method, url: requested, status }) => {
-    if (status >= 400) console.log(`${c.red(status)} ${method} ${requested}`);
+    // Browsers ask for /favicon.ico on their own; it says nothing about the site.
+    if (status >= 400 && requested !== '/favicon.ico') console.log(`${c.red(status)} ${method} ${requested}`);
   },
 });
 
