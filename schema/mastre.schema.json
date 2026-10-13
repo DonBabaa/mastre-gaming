@@ -1,0 +1,118 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:mastre:manifest:1",
+  "title": "Mastre Gaming game manifest",
+  "description": "mastre.json, at the root of a game repo. Tells the Mastre Gaming hub how to build the game and how to list it.",
+  "type": "object",
+  "required": ["schemaVersion", "id", "title", "description", "authors", "version", "cover", "build", "entry"],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "schemaVersion": {
+      "description": "Version of this contract. Always 1 for now.",
+      "const": 1
+    },
+    "id": {
+      "description": "Unique across the hub and permanent: it becomes the URL folder (/games/<id>/) and the storage prefix (mastre:<id>:).",
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$",
+      "maxLength": 64
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80
+    },
+    "description": {
+      "description": "One or two sentences shown on the launcher.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 600
+    },
+    "authors": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 20,
+      "items": { "type": "string", "minLength": 1, "maxLength": 60 }
+    },
+    "version": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 40
+    },
+    "cover": {
+      "description": "Path in the repo to a 16:9 cover image (1200x675 recommended, PNG, JPG or WebP, under 500 KB).",
+      "allOf": [
+        { "$ref": "#/$defs/relativePath" },
+        { "type": "string", "pattern": "\\.([pP][nN][gG]|[jJ][pP][eE]?[gG]|[wW][eE][bB][pP]|[aA][vV][iI][fF]|[gG][iI][fF])$" }
+      ]
+    },
+    "tags": {
+      "type": "array",
+      "maxItems": 12,
+      "items": { "type": "string", "minLength": 1, "maxLength": 32 },
+      "default": []
+    },
+    "controls": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "enum": ["keyboard", "mouse", "gamepad", "touch"] },
+      "default": []
+    },
+    "build": {
+      "description": "How to produce the static build on a clean Linux machine with Node 20. null for a game with no build step.",
+      "type": ["object", "null"],
+      "required": ["output"],
+      "properties": {
+        "install": {
+          "description": "Command that installs dependencies, e.g. \"npm ci\". null or omitted to skip.",
+          "type": ["string", "null"],
+          "maxLength": 500
+        },
+        "command": {
+          "description": "Command that builds the game, e.g. \"npm run build\". null or omitted to skip.",
+          "type": ["string", "null"],
+          "maxLength": 500
+        },
+        "output": {
+          "description": "Folder, relative to the repo root, that holds the finished static build.",
+          "$ref": "#/$defs/relativePath"
+        }
+      },
+      "additionalProperties": false
+    },
+    "output": {
+      "description": "Only used when build is null: the folder to publish. Defaults to \".\" (the repo root).",
+      "$ref": "#/$defs/relativePath"
+    },
+    "entry": {
+      "description": "The HTML file inside the build output that starts the game.",
+      "allOf": [
+        { "$ref": "#/$defs/relativePath" },
+        { "type": "string", "pattern": "\\.[hH][tT][mM][lL]?$" }
+      ]
+    },
+    "multiplayer": {
+      "type": "object",
+      "properties": {
+        "server": {
+          "description": "null, or the public wss:// or https:// URL of the game's own backend. The hub only hosts static files.",
+          "type": ["string", "null"],
+          "pattern": "^(wss|https)://",
+          "maxLength": 300
+        }
+      },
+      "default": { "server": null }
+    }
+  },
+  "$defs": {
+    "relativePath": {
+      "description": "A path relative to the repo root: forward slashes, no leading \"/\", no \"..\" segment.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 300,
+      "pattern": "^(?![/~])(?![A-Za-z]:)(?!.*\\\\)(?!(?:.*/)?\\.\\.(?:/|$)).+$"
+    }
+  }
+}

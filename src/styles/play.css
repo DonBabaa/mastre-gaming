@@ -1,0 +1,156 @@
+@import './base.css';
+
+html,
+body.play {
+  height: 100%;
+}
+
+body.play {
+  overflow: hidden;
+  background: #000;
+}
+
+/* The game fills the whole viewport. */
+.stage {
+  position: fixed;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  border: 0;
+}
+
+/* Small, top left, and gone after two seconds. */
+.back {
+  position: fixed;
+  top: max(12px, env(safe-area-inset-top));
+  left: max(12px, env(safe-area-inset-left));
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding-inline: 11px 14px;
+  font: 700 13px/1 var(--body);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--text);
+  background: rgb(7 7 11 / 0.84);
+  border: 2px solid rgb(255 255 255 / 0.2);
+  backdrop-filter: blur(8px);
+  transition: opacity 0.35s, transform 0.35s var(--ease), color 0.16s, background 0.16s, border-color 0.16s;
+}
+
+.back:hover,
+.back:focus-visible {
+  color: var(--ink-0);
+  background: var(--lime);
+  border-color: var(--lime);
+}
+
+.back.is-hidden:not(:focus-visible) {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-8px);
+}
+
+/* ───────────── loading screen ───────────── */
+
+.loading {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 1px 1px, rgb(255 255 255 / 0.06) 1px, transparent 0) 0 0 / 28px 28px,
+    var(--ink-0);
+  transition: opacity 0.4s;
+}
+
+.loading.is-done {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.loading__box {
+  display: grid;
+  gap: 16px;
+  width: min(100%, 560px);
+}
+
+.loading .cover {
+  margin-bottom: 14px;
+  border: 2px solid var(--lime);
+  box-shadow: 10px 10px 0 var(--pink);
+}
+
+.loading__title {
+  margin: 0;
+  font: 400 clamp(40px, 9vw, 84px) / 0.9 var(--display);
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+.loading__bar {
+  height: 6px;
+  overflow: hidden;
+  background: var(--ink-3);
+}
+
+.loading__bar::after {
+  content: '';
+  display: block;
+  width: 40%;
+  height: 100%;
+  background: var(--lime);
+  animation: load 1.1s var(--ease) infinite;
+}
+
+@keyframes load {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(250%);
+  }
+}
+
+.loading__hint {
+  margin: 0;
+  font-size: 14px;
+  color: var(--amber);
+}
+
+/* ───────────── unknown game, no connection ───────────── */
+
+.oops {
+  display: grid;
+  align-content: center;
+  justify-items: start;
+  gap: 16px;
+  min-height: 100%;
+  padding: 80px var(--gutter) 40px;
+  background:
+    radial-gradient(60vmax 42vmax at 105% -12%, rgb(255 61 127 / 0.2), transparent 62%),
+    radial-gradient(circle at 1px 1px, rgb(255 255 255 / 0.06) 1px, transparent 0) 0 0 / 28px 28px,
+    var(--ink-0);
+}
+
+.oops h1 {
+  margin: 0 0 0.1em;
+  font: 400 clamp(56px, 13vw, 168px) / 0.88 var(--display);
+  text-transform: uppercase;
+  text-shadow: 0.04em 0.04em 0 var(--pink);
+}
+
+.oops p:not(.eyebrow) {
+  max-width: 46ch;
+  margin: 0 0 8px;
+  font-size: 18px;
+  color: var(--soft);
+}

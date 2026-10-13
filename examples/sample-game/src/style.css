@@ -1,0 +1,50 @@
+html, body {
+  margin: 0;
+  height: 100%;
+  background: #07070b;
+  overflow: hidden;
+  touch-action: none;
+  user-select: none;
+  font: 600 13px/1 ui-monospace, "Cascadia Mono", Consolas, monospace;
+  color: #9a98ad;
+}
+
+body {
+  display: grid;
+  place-items: center;
+}
+
+canvas {
+  width: min(100vw, 100vh * 16 / 9);
+  height: min(100vh, 100vw * 9 / 16);
+  image-rendering: pixelated;
+  cursor: none;
+}
+
+#quit {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  padding: 8px 12px;
+  font: inherit;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #f4f1e8;
+  background: #15151f;
+  border: 2px solid #2b2b3b;
+  cursor: pointer;
+}
+
+#quit:hover {
+  color: #07070b;
+  background: #c6ff3a;
+  border-color: #c6ff3a;
+}
+
+#stamp {
+  position: fixed;
+  right: 12px;
+  bottom: 8px;
+  margin: 0;
+  opacity: 0.5;
+}

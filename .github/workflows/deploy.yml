@@ -1,0 +1,195 @@
+name: Deploy hub
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  # Picks up new commits in the game repos. GitHub may run this a few minutes late.
+  schedule:
+    - cron: '*/15 * * * *'
+  # Optional fast path: a game repo says "I changed" (see CONTRIBUTING.md).
+  repository_dispatch:
+    types: [game-updated]
+
+# Read-only everywhere. Only the last job, which runs no game code, may deploy.
+permissions:
+  contents: read
+
+# One deploy at a time; a newer run waits for the one in progress.
+concurrency:
+  group: mastre-deploy
+  cancel-in-progress: false
+
+jobs:
+  # Finds each game's latest commit. On the schedule this is usually the whole run:
+  # if no game and no hub file changed since the live site was built, it stops here.
+  plan:
+    name: Plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      deploy: ${{ steps.plan.outputs.deploy }}
+      count: ${{ steps.plan.outputs.count }}
+      matrix: ${{ steps.plan.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      # No setup-node and no npm ci on purpose: this step only needs git and the
+      # runner's own Node, and it runs every 15 minutes.
+      - name: Resolve game versions
+        id: plan
+        env:
+          MASTRE_READ_TOKEN: ${{ secrets.MASTRE_READ_TOKEN }}
+          MASTRE_HUB_URL: ${{ vars.MASTRE_HUB_URL }}
+          MASTRE_IF_CHANGED: ${{ (github.event_name == 'schedule' || github.event_name == 'repository_dispatch') && '1' || '' }}
+        run: node scripts/build-games.mjs plan
+
+      - name: Share the plan with the other jobs
+        if: steps.plan.outputs.deploy == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: plan
+          path: .mastre-cache/plan.json
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 1
+
+  # One job per game, each on its own machine. Game build steps are code we did not
+  # write: this job has a read-only token, the checkout leaves no credentials behind,
+  # and the step that runs the game's commands is given no secrets at all.
+  games:
+    name: Build ${{ matrix.game.id }}
+    needs: plan
+    if: needs.plan.outputs.deploy == 'true' && needs.plan.outputs.count != '0'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        game: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 20
+          package-manager-cache: false
+
+      - name: Install hub tooling
+        run: npm ci --omit=dev --ignore-scripts
+
+      - name: Get the plan
+        uses: actions/download-artifact@v8
+        with:
+          name: plan
+          path: .mastre-cache
+
+      # Exact key: this commit is already built, nothing to do.
+      # Prefix only: an older build of the same game, kept as the fallback if this one fails.
+      - name: Restore the last build of this game
+        uses: actions/cache/restore@v6
+        with:
+          path: .mastre-cache/out/games/${{ matrix.game.id }}
+          key: game-${{ matrix.game.id }}-${{ matrix.game.sha }}
+          restore-keys: |
+            game-${{ matrix.game.id }}-
+
+      # The only step that can read private game repos. It downloads; it runs nothing from the game.
+      - name: Fetch the source
+        env:
+          MASTRE_READ_TOKEN: ${{ secrets.MASTRE_READ_TOKEN }}
+          MASTRE_ENTRY: ${{ matrix.game.n }}
+        run: node scripts/build-games.mjs fetch --only "$MASTRE_ENTRY"
+
+      - name: Build (untrusted code, no secrets)
+        id: build
+        timeout-minutes: 15
+        env:
+          MASTRE_ENTRY: ${{ matrix.game.n }}
+        run: node scripts/build-games.mjs build --only "$MASTRE_ENTRY"
+
+      - name: Cache the new build
+        if: steps.build.outputs.status == 'built'
+        uses: actions/cache/save@v6
+        with:
+          path: .mastre-cache/out/games/${{ matrix.game.id }}
+          key: game-${{ matrix.game.id }}-${{ matrix.game.sha }}
+
+      # Also after a failed or timed-out build: the fallback build still has to reach the site.
+      - name: Hand the result over
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: game-${{ matrix.game.n }}
+          path: .mastre-cache/out
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 1
+
+  # Builds the launcher, adds the games, writes catalog.json. If a game job was
+  # lost (not "its build failed", which is handled, but "it never reported"),
+  # this job does not run and the live site stays as it is.
+  assemble:
+    name: Assemble site
+    needs: [plan, games]
+    if: ${{ !cancelled() && needs.plan.result == 'success' && needs.plan.outputs.deploy == 'true' && (needs.games.result == 'success' || needs.games.result == 'skipped') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 20
+          package-manager-cache: false
+
+      - run: npm ci
+
+      - name: Get the plan
+        uses: actions/download-artifact@v8
+        with:
+          name: plan
+          path: .mastre-cache
+
+      - name: Get the built games
+        if: needs.plan.outputs.count != '0'
+        uses: actions/download-artifact@v8
+        with:
+          pattern: game-*
+          path: .mastre-cache/out
+          merge-multiple: true
+
+      - name: Build the launcher
+        run: npm run build
+
+      - name: Add the games and write the catalog
+        run: node scripts/build-games.mjs collect
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: assemble
+    if: ${{ !cancelled() && needs.assemble.result == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

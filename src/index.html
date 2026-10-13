@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#07070b">
+    <meta name="color-scheme" content="dark">
+    <title>Mastre Gaming</title>
+    <meta name="description" content="Browser games made by friends, all in one launcher.">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="stylesheet" href="./styles/home.css">
+  </head>
+  <body class="home">
+    <div class="backdrop" aria-hidden="true"></div>
+
+    <header class="mast wrap">
+      <a class="logo" href="./" aria-label="Mastre Gaming, home">
+        <span class="logo__word">Mastre</span>
+        <span class="logo__tag">Gaming</span>
+      </a>
+      <dl class="stats" id="stats" hidden>
+        <div>
+          <dt>Games</dt>
+          <dd id="stat-games">00</dd>
+        </div>
+        <div>
+          <dt>Updated</dt>
+          <dd id="stat-updated">-</dd>
+        </div>
+      </dl>
+    </header>
+
+    <div class="ticker" aria-hidden="true">
+      <div class="ticker__track" id="ticker"></div>
+    </div>
+
+    <main class="wrap">
+      <section class="continue" id="continue" aria-label="Continue playing" hidden></section>
+
+      <section class="toolbar" id="toolbar" aria-label="Find a game" hidden>
+        <label class="search">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="7"></circle>
+            <path d="m20 20-3.8-3.8"></path>
+          </svg>
+          <span class="sr-only">Search games</span>
+          <input id="search" type="search" placeholder="Search games" autocomplete="off" spellcheck="false" enterkeyhint="search">
+          <kbd title="Press / to search">/</kbd>
+        </label>
+        <div class="tags" id="tags" role="group" aria-label="Filter by tag"></div>
+        <p class="count" id="count" aria-live="polite"></p>
+      </section>
+
+      <section class="grid" id="grid" aria-label="Games">
+        <div class="card card--ghost" aria-hidden="true"><div class="cover"></div><div class="card__body"><i></i><i></i><i></i></div></div>
+        <div class="card card--ghost" aria-hidden="true"><div class="cover"></div><div class="card__body"><i></i><i></i><i></i></div></div>
+        <div class="card card--ghost" aria-hidden="true"><div class="cover"></div><div class="card__body"><i></i><i></i><i></i></div></div>
+      </section>
+
+      <section class="notice" id="notice" hidden></section>
+    </main>
+
+    <footer class="foot wrap">
+      <p>Mastre Gaming. Games made by friends, one launcher.</p>
+      <p id="foot-meta"></p>
+    </footer>
+
+    <script type="module" src="./home.ts"></script>
+  </body>
+</html>

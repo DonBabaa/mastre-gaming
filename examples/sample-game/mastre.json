@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "id": "sample-game",
+  "title": "Coin Chase",
+  "description": "The sample game that ships with the hub. Catch the coins, dodge the bombs, beat your best score.",
+  "authors": ["Mastre Gaming"],
+  "version": "1.0.0",
+  "cover": "mastre/cover.png",
+  "tags": ["arcade", "sample"],
+  "controls": ["keyboard", "mouse", "touch"],
+  "build": {
+    "install": "npm ci",
+    "command": "npm run build",
+    "output": "dist"
+  },
+  "entry": "index.html",
+  "multiplayer": { "server": null }
+}

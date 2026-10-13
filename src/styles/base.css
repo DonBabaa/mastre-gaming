@@ -1,0 +1,152 @@
+@import '@fontsource/anton/latin-400.css';
+@import '@fontsource/chakra-petch/latin-400.css';
+@import '@fontsource/chakra-petch/latin-600.css';
+@import '@fontsource/chakra-petch/latin-700.css';
+
+:root {
+  --ink-0: #07070b;
+  --ink-1: #0d0d14;
+  --ink-2: #14141e;
+  --ink-3: #1e1e2b;
+  --line: #2b2b3b;
+  --text: #f4f1e8;
+  --soft: #c9c6d6;
+  --dim: #9a98ad;
+  --lime: #c6ff3a;
+  --pink: #ff3d7f;
+  --amber: #ffb224;
+
+  --display: 'Anton', 'Haettenschweiler', 'Arial Narrow Bold', Impact, sans-serif;
+  --body: 'Chakra Petch', ui-sans-serif, system-ui, 'Segoe UI', sans-serif;
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --gutter: clamp(16px, 4vw, 56px);
+
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  color: var(--text);
+  background: var(--ink-0);
+  font: 400 16px/1.5 var(--body);
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+:focus-visible {
+  outline: 2px solid var(--lime);
+  outline-offset: 3px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.eyebrow {
+  margin: 0;
+  font: 700 12px/1 var(--body);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--lime);
+}
+
+/* The one button shape: a lime slab with two corners cut off. */
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7em;
+  padding: 0.95em 1.4em;
+  font: 700 14px/1 var(--body);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--ink-0);
+  background: var(--lime);
+  border: 0;
+  cursor: pointer;
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+  transition: background 0.16s, transform 0.16s var(--ease);
+}
+
+/* The play triangle. */
+.button::before {
+  content: '';
+  border-block: 0.42em solid transparent;
+  border-left: 0.7em solid currentColor;
+}
+
+.button--plain::before {
+  content: none;
+}
+
+.button:hover,
+.button:focus-visible {
+  background: var(--text);
+}
+
+.button:active {
+  transform: translateY(1px);
+}
+
+/* 16:9 cover. The title panel underneath shows when there is no image. */
+.cover {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  container-type: inline-size;
+  background: linear-gradient(135deg, hsl(var(--hue, 80) 75% 30%), hsl(calc(var(--hue, 80) + 70) 70% 12%));
+}
+
+.cover img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cover__fallback {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 8%;
+  text-align: center;
+  font: 400 clamp(20px, 11cqw, 96px) / 0.92 var(--display);
+  text-transform: uppercase;
+  color: rgb(255 255 255 / 0.92);
+  overflow-wrap: anywhere;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
