@@ -1,4 +1,5 @@
 [
   { "repo": "DonBabaa/Deadglide", "ref": "mastre-port" },
-  { "repo": "DonBabaa/Hand-to-Hand", "ref": "mastre-port" }
+  { "repo": "DonBabaa/Hand-to-Hand", "ref": "mastre-port" },
+  { "repo": "PCrrfng/MastresRacing", "ref": "main" }
 ]
