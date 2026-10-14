@@ -4,9 +4,10 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
-  # Picks up new commits in the game repos. GitHub may run this a few minutes late.
+  # Picks up new commits in the game repos, every 15 minutes. Off the quarter
+  # hours on purpose: GitHub delays or drops scheduled runs at its busiest times.
   schedule:
-    - cron: '*/15 * * * *'
+    - cron: '7,22,37,52 * * * *'
   # Optional fast path: a game repo says "I changed" (see CONTRIBUTING.md).
   repository_dispatch:
     types: [game-updated]
@@ -183,7 +184,7 @@ jobs:
     needs: assemble
     if: ${{ !cancelled() && needs.assemble.result == 'success' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 15
     permissions:
       pages: write
       id-token: write
@@ -193,6 +194,3 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v5
-        with:
-          # GitHub Pages sometimes takes more than the default 10 minutes to confirm.
-          timeout: 1800000
