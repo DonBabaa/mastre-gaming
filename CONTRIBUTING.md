@@ -3,7 +3,7 @@
 Mastre Gaming is a launcher for browser games made by friends. Your game stays in **your own repo**. The hub clones it, builds it, and serves it at:
 
 ```
-https://donbabaa.github.io/mastre-gaming/games/<your-id>/
+https://mastre-gaming.github.io/games/<your-id>/
 ```
 
 inside a frame, on the same website as everyone else's games. To be listed, your repo needs one small file and has to follow a few rules. Gameplay does not change.
@@ -66,7 +66,7 @@ All paths are relative to the repo root, use forward slashes, and may not start 
 The full contract as a JSON Schema: [schema/mastre.schema.json](schema/mastre.schema.json). To get completion and checks in your editor, add this as the first line of your `mastre.json`:
 
 ```json
-"$schema": "https://donbabaa.github.io/mastre-gaming/schema/mastre.schema.json",
+"$schema": "https://mastre-gaming.github.io/schema/mastre.schema.json",
 ```
 
 ## 2. Make it work from a subfolder
@@ -120,8 +120,8 @@ Without `mastre:ready`, the loading screen leaves as soon as your page has loade
 The hub comes with a checker that does what the real pipeline does: it validates `mastre.json`, runs your build, scans the result for absolute paths and Service Workers, and then serves your game inside the real launcher under a subpath.
 
 ```bash
-git clone https://github.com/DonBabaa/mastre-gaming.git
-cd mastre-gaming
+git clone https://github.com/mastre-gaming/mastre-gaming.github.io.git
+cd mastre-gaming.github.io
 npm install
 npm run check-game -- ../my-game
 ```
@@ -150,7 +150,7 @@ They add one line to [`games.json`](games.json):
 
 You can also open a pull request that adds that line yourself.
 
-If your repo is private, the easiest path is to make it public; the built game is public anyway. Otherwise talk to the hub owner about access.
+If your repo is private, the easiest path is to make it public; the built game is public anyway. Another option is to keep the repo private but move it into the [mastre-gaming](https://github.com/mastre-gaming) organisation, where the hub can be given read access to it. Talk to the hub owner.
 
 ## 8. Updating your game
 
@@ -183,18 +183,20 @@ jobs:
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer $MASTRE_HUB_TOKEN" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
-            https://api.github.com/repos/DonBabaa/mastre-gaming/dispatches \
+            https://api.github.com/repos/mastre-gaming/mastre-gaming.github.io/dispatches \
             -d "{\"event_type\":\"game-updated\",\"client_payload\":{\"repo\":\"$GAME_REPO\"}}"
 ```
 
 It needs a token, stored in your repo as a secret named `MASTRE_HUB_TOKEN`:
 
 1. The **hub owner** creates a fine-grained personal access token: **GitHub → Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token**.
-   - Repository access: **Only select repositories** → `mastre-gaming`.
+   - Resource owner: the **mastre-gaming** organisation.
+   - Repository access: **Only select repositories** → `mastre-gaming.github.io`.
    - Repository permissions: **Contents → Read and write**. (GitHub requires write access to send this kind of event.)
    - Give it an expiry date.
-2. They send you the token privately.
-3. In **your** repo: **Settings → Secrets and variables → Actions → New repository secret**, name `MASTRE_HUB_TOKEN`, paste the token.
+2. If the organisation asks for the token to be approved, they approve it under the organisation's **Settings → Personal access tokens → Pending requests**.
+3. They send you the token privately.
+4. In **your** repo: **Settings → Secrets and variables → Actions → New repository secret**, name `MASTRE_HUB_TOKEN`, paste the token.
 
 Be aware of what that token is: it can also push to the hub repo, so the hub owner should only hand it to people they would trust with that. Without it, nothing is lost: the 15-minute schedule picks up your changes anyway.
 

@@ -3,8 +3,8 @@
 One launcher for browser games made by friends. Every game stays in its own GitHub repo; this repo clones them, builds them, and publishes them together as a single static site on GitHub Pages:
 
 ```
-https://<you>.github.io/mastre-gaming/               the launcher
-https://<you>.github.io/mastre-gaming/games/<id>/    each game
+https://mastre-gaming.github.io/               the launcher
+https://mastre-gaming.github.io/games/<id>/    each game
 ```
 
 All games share one origin on purpose, so shared logins, profiles and cross-game stats can be added later (see [Roadmap](#roadmap)).
@@ -21,7 +21,7 @@ npm run build:all
 npm run preview
 ```
 
-Then open <http://localhost:4380/mastre-gaming/>. The site is served under a subpath on purpose, the same way GitHub Pages serves it, so anything that wrongly assumes it lives at the domain root breaks here first.
+Then open <http://localhost:4380/mastre-gaming/>. The site is served under a subpath on purpose, so anything that wrongly assumes it lives at the domain root breaks here first. The launcher works the same at a domain root and under a subpath.
 
 `build:all` builds the launcher, every game in `games.json`, and the sample game in `examples/sample-game/`.
 
@@ -55,10 +55,10 @@ After that, nothing else is needed: new commits in a game repo are picked up wit
 
 ## Put it online (once)
 
-1. Push this repo to GitHub. Keep it **public**: GitHub Pages is free for public repos, and so are the Actions minutes the 15-minute schedule uses.
+1. Push this repo to GitHub. Keep it **public**: GitHub Pages is free for public repos, and so are the Actions minutes the 15-minute schedule uses. The repo's name sets the address: a repo named `<owner>.github.io` is served at `https://<owner>.github.io/`, any other name at `https://<owner>.github.io/<name>/`. This one lives in the `mastre-gaming` organisation as `mastre-gaming.github.io`.
 2. On GitHub, open the repo, then **Settings → Pages → Build and deployment → Source** and choose **GitHub Actions**.
 3. Open the **Actions** tab, pick **Deploy hub**, and press **Run workflow** (or just push a commit).
-4. When the run is green, the site is at `https://<you>.github.io/mastre-gaming/`.
+4. When the run is green, the site is at `https://mastre-gaming.github.io/`.
 
 Optional settings, under **Settings → Secrets and variables → Actions**:
 
@@ -73,7 +73,7 @@ Public game repos need nothing. For private ones, create a fine-grained personal
 
 Two things to know:
 
-- A fine-grained token only reaches repos owned by the account (or organisation) it belongs to. For a private repo on a friend's personal account, the simplest fix is to make that repo public. The built game is published publicly either way.
+- A fine-grained token only reaches repos owned by the account or organisation it belongs to. Create it with the **mastre-gaming** organisation as its owner, and it can read private game repos that live in the organisation. For a private repo on a friend's personal account, the simplest fix is to make that repo public, or to move it into the organisation. The built game is published publicly either way.
 - The token is only used to download source. It is never present while a game's build commands run.
 
 ## How the pipeline works
@@ -119,7 +119,7 @@ The launcher reads this file at runtime. Each game carries its manifest fields p
 {
   "schemaVersion": 1,
   "generatedAt": "2026-10-13T17:42:00.000Z",
-  "hub": { "repo": "DonBabaa/mastre-gaming", "sha": "…" },
+  "hub": { "repo": "mastre-gaming/mastre-gaming.github.io", "sha": "…" },
   "games": [
     {
       "id": "deadslide",
