@@ -183,7 +183,7 @@ jobs:
     needs: assemble
     if: ${{ !cancelled() && needs.assemble.result == 'success' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 40
     permissions:
       pages: write
       id-token: write
@@ -193,3 +193,6 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v5
+        with:
+          # GitHub Pages sometimes takes more than the default 10 minutes to confirm.
+          timeout: 1800000
