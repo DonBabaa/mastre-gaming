@@ -2,6 +2,7 @@ import { coverUrl, lastChange, loadCatalog, playUrl, type Catalog, type CatalogG
 import { coverBox } from './lib/cover';
 import { byId, controlIcon, el, present, timeAgo } from './lib/dom';
 import { getLastPlayed } from './lib/storage';
+import { setupUpdatePanel } from './lib/updater';
 
 const grid = byId('grid');
 const notice = byId('notice');
@@ -197,24 +198,18 @@ function contributeLink(catalog: Catalog): HTMLElement | undefined {
 
 // ───────────────────────────── start ─────────────────────────────
 
-async function start(): Promise<void> {
-  renderTicker();
+let shown: Catalog | null = null;
 
-  let catalog: Catalog;
-  try {
-    catalog = await loadCatalog();
-  } catch {
-    grid.hidden = true;
-    showNotice('The game list did not load', 'Check your connection, then try again.', button('Try again', () => location.reload()));
-    return;
-  }
-
+/** Puts a catalog on the page. Also used when the update panel brings a newer one. */
+function apply(catalog: Catalog): void {
+  shown = catalog;
   state.games = [...catalog.games].sort((a, b) => lastChange(b) - lastChange(a));
   renderHeader(catalog);
   renderTicker();
 
   if (state.games.length === 0) {
     grid.hidden = true;
+    toolbar.hidden = true;
     showNotice(
       'No games loaded yet',
       'This shelf is empty. Games show up here as soon as one is added to the hub.',
@@ -226,6 +221,21 @@ async function start(): Promise<void> {
   toolbar.hidden = false;
   renderContinue();
   render();
+}
+
+async function start(): Promise<void> {
+  renderTicker();
+  setupUpdatePanel(() => shown, apply);
+
+  let catalog: Catalog;
+  try {
+    catalog = await loadCatalog();
+  } catch {
+    grid.hidden = true;
+    showNotice('The game list did not load', 'Check your connection, then try again.', button('Try again', () => location.reload()));
+    return;
+  }
+  apply(catalog);
 }
 
 search.addEventListener('input', () => {

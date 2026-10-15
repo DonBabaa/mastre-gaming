@@ -551,6 +551,118 @@ main {
   color: var(--soft);
 }
 
+/* ───────────── hidden update panel ───────────── */
+
+.updater {
+  width: min(100% - 32px, 460px);
+  margin: auto;
+  padding: 30px 28px 26px;
+  color: var(--text);
+  background: var(--ink-1);
+  border: 2px solid var(--lime);
+  box-shadow: 10px 10px 0 var(--pink);
+}
+
+.updater::backdrop {
+  background: rgb(7 7 11 / 0.78);
+  backdrop-filter: blur(4px);
+}
+
+.updater h2 {
+  margin: 10px 0 8px;
+  font: 400 clamp(38px, 9vw, 52px) / 0.95 var(--display);
+  text-transform: uppercase;
+}
+
+.updater__text {
+  margin: 0 0 20px;
+  color: var(--soft);
+}
+
+.updater__form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.updater__form input {
+  flex: 1 1 160px;
+  min-width: 0;
+  height: 46px;
+  padding: 0 14px;
+  font: 600 16px var(--body);
+  color: var(--text);
+  background: var(--ink-2);
+  border: 2px solid var(--line);
+  outline: none;
+}
+
+.updater__form input:focus {
+  border-color: var(--lime);
+}
+
+.updater__form .button:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+
+.updater__status {
+  min-height: 1.5em;
+  margin-top: 16px;
+  color: var(--soft);
+}
+
+.updater__status p {
+  margin: 0 0 6px;
+}
+
+.updater__status a {
+  color: var(--lime);
+  text-underline-offset: 3px;
+}
+
+.updater__bar {
+  height: 6px;
+  margin-top: 10px;
+  overflow: hidden;
+  background: var(--ink-3);
+}
+
+.updater__bar::after {
+  content: '';
+  display: block;
+  width: 40%;
+  height: 100%;
+  background: var(--lime);
+  animation: updater-bar 1.1s var(--ease) infinite;
+}
+
+@keyframes updater-bar {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(250%);
+  }
+}
+
+.updater__close {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  width: 36px;
+  height: 36px;
+  font: 400 26px/1 var(--body);
+  color: var(--dim);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.updater__close:hover {
+  color: var(--text);
+}
+
 /* ───────────── footer ───────────── */
 
 .foot {

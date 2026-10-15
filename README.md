@@ -76,6 +76,23 @@ Two things to know:
 - A fine-grained token only reaches repos owned by the account or organisation it belongs to. Create it with the **mastre-gaming** organisation as its owner, and it can read private game repos that live in the organisation. For a private repo on a friend's personal account, the simplest fix is to make that repo public, or to move it into the organisation. The built game is published publicly either way.
 - The token is only used to download source. It is never present while a game's build commands run.
 
+## Force an update
+
+The hub has a hidden **Force update** panel. On the home page, type the Konami code (↑ ↑ ↓ ↓ ← → ← → B A), or add `#update` to the address (`https://mastre-gaming.github.io/#update`, handy on a phone). Enter the code and press **Update now**: every game that changed is rebuilt and put online, usually within three minutes, and the panel says which games were updated. When nothing changed, it says so after a few seconds.
+
+Behind it is the **updater** ([`updater/`](updater/)), a small Cloudflare Worker that holds the GitHub key the page must not contain. It only starts the deploy workflow, never more than once every two minutes, and only for the right code. It also starts the same check every 15 minutes on its own, because GitHub's schedule does not keep time.
+
+Setting it up, once:
+
+1. **A GitHub key that can only start the workflow.** GitHub → Settings → Developer settings → Fine-grained tokens → Generate new token. Resource owner: **Mastre-gaming**. Repository access: only `mastre-gaming.github.io`. Repository permissions: **Actions → Read and write**, nothing else. If the organisation asks, approve it under its Settings → Personal access tokens → Pending requests.
+2. **Deploy the Worker**: in `updater/`, run `npm install`, `npx wrangler login`, then `npm run deploy`. Wrangler prints its address, `https://mastre-updater.<your-subdomain>.workers.dev`.
+3. **Its two secrets**, in the Cloudflare dashboard → Workers & Pages → `mastre-updater` → Settings → Variables and Secrets → Add, type **Secret**: `GITHUB_TOKEN` (the key from step 1) and `UPDATE_CODE` (the code you will type in the panel; use at least 10 characters).
+4. **Tell the hub where it is**: put that address in [`src/config.ts`](src/config.ts) and push. Until then the panel does not exist.
+
+`npm test` in `updater/` tests it against a fake GitHub. To try the panel locally against a stand-in, build with `VITE_MASTRE_UPDATER_URL=http://localhost:<port> npm run build`.
+
+The code is remembered in the browser once it has worked. Everything on the site shares that browser storage, so a game could read it; the worst it could do with it is start an update.
+
 ## How the pipeline works
 
 [`scripts/build-games.mjs`](scripts/build-games.mjs) does the work, in four steps that the workflow runs as separate jobs:
@@ -107,8 +124,9 @@ Files and folders whose name starts with a dot (`.git`, `.env`, ...) and symlink
 ### Caching and the schedule
 
 - Built games are cached with `actions/cache`, one cache per game: key `game-<id>-<sha>`, restore prefix `game-<id>-`. An exact hit means "already built"; a prefix hit is the fallback build used if the new commit fails.
-- The workflow runs on a push to `main`, on demand, every 15 minutes, and on a `repository_dispatch` of type `game-updated`.
-- The scheduled and dispatched runs first compare every game's current commit with the live `catalog.json`. If no game moved and the hub itself did not change, the run **stops after the plan step** and nothing is built or deployed. A push to `main` or a manual run always deploys.
+- The workflow runs on a push to `main`, on demand (by hand, or from the updater with `only_if_changed`), every 15 minutes, and on a `repository_dispatch` of type `game-updated`.
+- GitHub's own 15-minute schedule is unreliable in practice: on this repo it ran every few hours. The updater's cron (see [Force an update](#force-an-update)) does the same job on time.
+- The scheduled, dispatched and updater runs first compare every game's current commit with the live `catalog.json`. If no game moved and the hub itself did not change, the run **stops after the plan step** and nothing is built or deployed. A push to `main` or a manual run from the Actions tab always deploys.
 - A game whose last build failed is retried on the schedule after 6 hours, not every 15 minutes. A full run also happens at least every 5 days so the caches (which GitHub drops after 7 idle days) stay alive.
 
 ### `catalog.json`

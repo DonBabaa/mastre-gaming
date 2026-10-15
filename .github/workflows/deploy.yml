@@ -3,7 +3,14 @@ name: Deploy hub
 on:
   push:
     branches: [main]
+  # By hand from the Actions tab, or from the updater (updater/), which passes
+  # only_if_changed so that pressing it when nothing moved costs a few seconds.
   workflow_dispatch:
+    inputs:
+      only_if_changed:
+        description: Stop early if no game and no hub file changed since the last deploy
+        type: boolean
+        default: false
   # Picks up new commits in the game repos, every 15 minutes. Off the quarter
   # hours on purpose: GitHub delays or drops scheduled runs at its busiest times.
   schedule:
@@ -44,7 +51,7 @@ jobs:
         env:
           MASTRE_READ_TOKEN: ${{ secrets.MASTRE_READ_TOKEN }}
           MASTRE_HUB_URL: ${{ vars.MASTRE_HUB_URL }}
-          MASTRE_IF_CHANGED: ${{ (github.event_name == 'schedule' || github.event_name == 'repository_dispatch') && '1' || '' }}
+          MASTRE_IF_CHANGED: ${{ (github.event_name == 'schedule' || github.event_name == 'repository_dispatch' || inputs.only_if_changed) && '1' || '' }}
         run: node scripts/build-games.mjs plan
 
       - name: Share the plan with the other jobs

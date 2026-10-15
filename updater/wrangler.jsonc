@@ -1,0 +1,10 @@
+// The Mastre Gaming updater (see index.js). Deploy with `npm run deploy` in this folder.
+// The two secrets, GITHUB_TOKEN and UPDATE_CODE, are set in the Cloudflare dashboard.
+{
+  "name": "mastre-updater",
+  "main": "index.js",
+  "compatibility_date": "2026-09-01",
+  "workers_dev": true,
+  // Every 15 minutes, on time. The workflow stops after a few seconds when nothing changed.
+  "triggers": { "crons": ["*/15 * * * *"] }
+}

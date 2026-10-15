@@ -9,3 +9,8 @@ examples/*/node_modules/
 .DS_Store
 Thumbs.db
 *.log
+
+# Cloudflare Worker
+updater/node_modules/
+updater/.wrangler/
+updater/.dev.vars

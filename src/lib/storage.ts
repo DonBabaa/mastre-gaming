@@ -37,3 +37,13 @@ export function getLastPlayed(): LastPlayed | null {
 export function setLastPlayed(id: string): void {
   write('last', { id, at: Date.now() } satisfies LastPlayed);
 }
+
+/** The update panel's code, remembered on this device once it has worked. */
+export function getUpdateCode(): string {
+  const code = read<string>('update-code');
+  return typeof code === 'string' ? code : '';
+}
+
+export function setUpdateCode(code: string): void {
+  write('update-code', code);
+}

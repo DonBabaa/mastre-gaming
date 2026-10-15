@@ -37,9 +37,10 @@ export interface Catalog {
   games: CatalogGame[];
 }
 
-export async function loadCatalog(): Promise<Catalog> {
+/** `fresh` adds a throwaway query so no cache in between can answer with an old copy. */
+export async function loadCatalog({ fresh = false } = {}): Promise<Catalog> {
   // Relative on purpose: the hub may live under a subpath.
-  const response = await fetch('./catalog.json', { cache: 'no-cache' });
+  const response = await fetch(fresh ? `./catalog.json?t=${Date.now()}` : './catalog.json', { cache: 'no-cache' });
   if (!response.ok) throw new Error(`catalog.json: HTTP ${response.status}`);
   const catalog = (await response.json()) as Catalog;
   if (!Array.isArray(catalog.games)) throw new Error('catalog.json has no games list');

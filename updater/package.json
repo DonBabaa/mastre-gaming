@@ -1,0 +1,13 @@
+{
+  "name": "mastre-updater",
+  "private": true,
+  "type": "module",
+  "description": "Cloudflare Worker that starts the hub's deploy: the hidden update button and an on-time 15-minute check.",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "test": "node test.mjs"
+  },
+  "devDependencies": {
+    "wrangler": "4.151.0"
+  }
+}
